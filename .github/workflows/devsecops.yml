@@ -87,12 +87,14 @@ jobs:
       - name: SonarCloud scan
         uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602
         env:
+          SONAR_HOST_URL: https://sonarcloud.io
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       - name: Enforce Quality Gate
         uses: SonarSource/sonarqube-quality-gate-action@7a5fffe8e523c40e0c740b6bc2712ab503e52efa
         timeout-minutes: 5
         env:
+          SONAR_HOST_URL: https://sonarcloud.io
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   trivy:
@@ -111,44 +113,40 @@ jobs:
       - name: Load image
         run: docker load --input image.tar.gz
 
-      - name: Scan dependencies and image report
-        uses: aquasecurity/trivy-action@915b19bbe73b92a6cf82a1bc12b087c9a19a5fe2
-        with:
-          scan-type: fs
-          scan-ref: .
-          scanners: vuln
-          format: json
-          output: trivy-fs.json
-          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
-          exit-code: '0'
+      - name: Pull Trivy scanner
+        run: docker pull aquasec/trivy:0.56.1
 
-      - name: Scan image report
-        uses: aquasecurity/trivy-action@915b19bbe73b92a6cf82a1bc12b087c9a19a5fe2
-        with:
-          image-ref: ${{ env.IMAGE }}:ci
-          scanners: vuln
-          format: json
-          output: trivy-image.json
-          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
-          exit-code: '0'
+      - name: Scan dependencies and image report
+        run: |
+          docker run --rm \
+            -v "$GITHUB_WORKSPACE:/work" \
+            -w /work \
+            aquasec/trivy:0.56.1 fs --scanners vuln \
+            --format json --output trivy-fs.json \
+            --severity UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL /work
+          docker run --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            -v "$GITHUB_WORKSPACE:/work" \
+            -v "$HOME/.cache/trivy:/root/.cache/trivy" \
+            aquasec/trivy:0.56.1 image --scanners vuln \
+            --format json --output /work/trivy-image.json \
+            --severity UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL "$IMAGE:ci"
 
       - name: Block fixable HIGH and CRITICAL dependency vulnerabilities
-        uses: aquasecurity/trivy-action@915b19bbe73b92a6cf82a1bc12b087c9a19a5fe2
-        with:
-          scan-type: fs
-          scan-ref: .
-          scanners: vuln
-          ignore-unfixed: true
-          severity: HIGH,CRITICAL
-          exit-code: '1'
+        run: |
+          docker run --rm \
+            -v "$GITHUB_WORKSPACE:/work" \
+            -w /work \
+            aquasec/trivy:0.56.1 fs --scanners vuln \
+            --ignore-unfixed --severity HIGH,CRITICAL --exit-code 1 /work
 
       - name: Block fixable HIGH and CRITICAL image vulnerabilities
-        uses: aquasecurity/trivy-action@915b19bbe73b92a6cf82a1bc12b087c9a19a5fe2
-        with:
-          image-ref: ${{ env.IMAGE }}:ci
-          ignore-unfixed: true
-          severity: HIGH,CRITICAL
-          exit-code: '1'
+        run: |
+          docker run --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            -v "$HOME/.cache/trivy:/root/.cache/trivy" \
+            aquasec/trivy:0.56.1 image --ignore-unfixed \
+            --severity HIGH,CRITICAL --exit-code 1 "$IMAGE:ci"
 
       - name: Upload Trivy reports
         if: always()
