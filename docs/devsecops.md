@@ -21,11 +21,14 @@ testes, Gitleaks, SonarCloud, Trivy e SBOM terminam com sucesso.
 
 1. Criar o projeto `guilhermesemog_ufla-devops-shop` no SonarCloud, na
    organização `guilhermesemog`.
-2. Criar um token do SonarCloud e cadastrá-lo no repositório como secret
+2. Em **Administration > Analysis Method**, desativar **Automatic Analysis**.
+  O workflow executa a análise por CI; os dois métodos não podem ficar ativos
+  ao mesmo tempo.
+3. Criar um token do SonarCloud e cadastrá-lo no repositório como secret
    `SONAR_TOKEN`.
-3. Configurar no SonarCloud o Quality Gate para código novo, incluindo ausência
+4. Configurar no SonarCloud o Quality Gate para código novo, incluindo ausência
    de vulnerabilidades e Security Hotspots revisados.
-4. Em **Settings > Rules > Rulesets** ou **Branches**, proteger `main` e exigir
+5. Em **Settings > Rules > Rulesets** ou **Branches**, proteger `main` e exigir
    os checks `Gitleaks`, `SonarCloud quality gate`, `Trivy vulnerability scans`
    e `Tests and image build` antes do merge.
 
