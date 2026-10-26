@@ -49,3 +49,53 @@ Para a demonstração, use uma branch temporária e altere apenas uma dependênc
 para uma versão com CVE conhecida. Abra o Pull Request, registre a falha e
 reverta a dependência para uma versão corrigida antes de qualquer merge ou
 publicação.
+
+## Checklist final e links da entrega
+
+Substitua cada marcador entre colchetes pelos links reais do GitHub antes de
+entregar. Não use caminhos locais do Windows, como `C:\Users\...`.
+
+```text
+Repositório:
+[COLE_AQUI_O_LINK_DO_REPOSITORIO]
+
+Pull Request principal do trabalho:
+[COLE_AQUI_O_LINK_DO_PR_PRINCIPAL]
+
+Pull Request bloqueado pela vulnerabilidade:
+[COLE_AQUI_O_LINK_DO_PR_BLOQUEADO]
+
+Pull Request ou execução após a correção:
+[COLE_AQUI_O_LINK_DO_PR_CORRIGIDO]
+
+Execução aprovada do GitHub Actions:
+[COLE_AQUI_O_LINK_DA_EXECUCAO_APROVADA]
+
+Artifact do SBOM:
+[COLE_AQUI_O_LINK_DA_EXECUCAO_COM_SBOM]
+
+Artifact dos relatórios Trivy:
+[COLE_AQUI_O_LINK_DA_EXECUCAO_COM_TRIVY]
+
+Imagem pública no GHCR:
+[COLE_AQUI_O_LINK_DO_PACOTE_GHCR]
+```
+
+### Conteúdo do arquivo ZIP
+
+O ZIP da pasta de evidências deve conter, no mínimo:
+
+- `pr-bloqueado.png`: captura do Pull Request bloqueado;
+- `pr-corrigido.png`: captura do Pull Request ou execução corrigida;
+- `execucao-aprovada.png`: captura da execução final aprovada;
+- `trivy-reports.zip` ou os arquivos `trivy-fs.json` e `trivy-image.json`;
+- `ufla-shop-sbom.cdx.json`.
+
+O arquivo `docs/devsecops.md` atualizado deve permanecer no repositório, e o
+ZIP deve ser anexado à entrega junto com o link do repositório. Os links dos
+Pull Requests, da execução aprovada, dos artifacts e do GHCR devem aparecer
+também no campo de entrega ou no documento, conforme o formato solicitado pelo
+professor.
+
+Antes de enviar, confirme que o ZIP não contém tokens, senhas, `.env` ou outros
+segredos.
